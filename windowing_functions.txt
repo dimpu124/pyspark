@@ -1,0 +1,16 @@
+df = sampleDf.withColumn('next', lag('_c0').over(
+    Window.partitionBy('_c1').orderBy('_c1')
+    )
+)
+
+df22 = df2.withColumn('ranking',when(df2.session_id <= 30.0 , 0 ).otherwise(1))
+
+windowval = (Window.partitionBy('_c1').orderBy('_c0')
+             .rangeBetween(Window.unboundedPreceding, 0))
+df4 = df22.withColumn('cum_sum', sum('ranking').over(windowval))
+
+
+df42 = df4.withColumn('session_id', concat( df4._c1 , lit('_') , df4.cum_sum.cast(StringType())))
+columns_to_drop = ['next', 'ranking','cum_sum']
+df5 = df42.drop(*columns_to_drop)
+df5.show()
